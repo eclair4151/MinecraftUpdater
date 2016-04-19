@@ -1,5 +1,5 @@
 
-m urllib import urlopen, urlretrieve
+from urllib import urlopen, urlretrieve
 import json
 import os
 import time
