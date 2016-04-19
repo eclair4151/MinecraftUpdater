@@ -1,4 +1,3 @@
-
 from urllib import urlopen, urlretrieve
 import json
 import os
@@ -70,9 +69,6 @@ for version in data['versions']:
                 os.makedirs("world_backups")
 
             backupPath = "world_backups/world" +"_backup_" + str(int(time.time()/1000)) + "_sha=" + cur_ver
-            if os.path.exists(backupPath):
-                shutil.rmtree(backupPath)
-
             shutil.copytree("../world", backupPath)
 
             log('Backed up world\nUpdating server jar', logFile)
