@@ -1,9 +1,11 @@
-from urllib import urlopen, urlretrieve
+
+m urllib import urlopen, urlretrieve
 import json
 import os
 import time
 import shutil
-
+import hashlib
+import time
 
 def log(string, logfile):
     print(string)
@@ -12,6 +14,7 @@ def log(string, logfile):
 
 updateToSnapShot = True
 
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 url = "https://launchermeta.mojang.com/mc/game/version_manifest.json"
 response = urlopen(url)
 res = response.read()
@@ -22,24 +25,27 @@ if updateToSnapShot:
 else:
     minecraft_ver = data['latest']['release']
 
-
-if not os.path.isfile('version.txt'): #create version file if it does not exist
-    open('version.txt', 'w')
-
-versionFile = open('version.txt', 'r+')
 logFile = open("update.log", "a+")
-cur_ver = versionFile.read()
-if cur_ver == "":
-    cur_ver = "init"
-log('Your version is ' + cur_ver + '. Latest version is ' + str(minecraft_ver), logFile)
 
-if cur_ver != minecraft_ver:
-    log('Updating Server', logFile)
-    for version in data['versions']:
-        if version['id'] == minecraft_ver:
-            jsonlink = version['url']
-            jarres = urlopen(jsonlink).read()
-            jardata = json.loads(jarres.decode('UTF-8'))
+if os.path.exists('../minecraft_server.jar'):
+    sha = hashlib.sha1()
+    f = open("../minecraft_server.jar", 'rb')
+    sha.update(f.read())
+    cur_ver = sha.hexdigest()
+else:
+    cur_ver = ""
+
+for version in data['versions']:
+    if version['id'] == minecraft_ver:
+        jsonlink = version['url']
+        jarres = urlopen(jsonlink).read()
+        jardata = json.loads(jarres.decode('UTF-8'))
+        jarsha = jardata['downloads']['server']['sha1']
+
+        log('Your sha1 is ' + cur_ver + '. Latest version is ' + str(minecraft_ver) + " with sha1 of " + jarsha, logFile)
+
+        if cur_ver != jarsha:
+            log('Updating Server', logFile)
             link = jardata['downloads']['server']['url']
             log('Downloading jar from ' + link, logFile)
             urlretrieve(link, 'minecraft_server.jar')
@@ -58,37 +64,30 @@ if cur_ver != minecraft_ver:
 
             log('Stopping server', logFile)
             os.system('screen -S minecraft -X stuff \'stop^M\'')
-            time.sleep(5) #sleep for 5 seconds to allow for server to shutdown. Adjust if your server is modded and needs more time
-
+            time.sleep(5)
             log('Backing up world', logFile)
             if not os.path.exists("world_backups"):
                 os.makedirs("world_backups")
 
-            if os.path.exists("world_backups/world" +"_backup_" + cur_ver):
-                shutil.rmtree("world_backups/world" +"_backup_" + cur_ver)
+            backupPath = "world_backups/world" +"_backup_" + str(int(time.time()/1000)) + "_sha=" + cur_ver
+            if os.path.exists(backupPath):
+                shutil.rmtree(backupPath)
 
-            shutil.copytree("../world", "world_backups/world" +"_backup_" + cur_ver)
+            shutil.copytree("../world", backupPath)
 
             log('Backed up world\nUpdating server jar', logFile)
             if os.path.exists('../minecraft_server.jar'):
                 os.remove('../minecraft_server.jar')
 
             os.rename('minecraft_server.jar', '../minecraft_server.jar')
-            log('Updating version file', logFile)
-            logFile.write('Updating version file\n')
-            versionFile.seek(0)
-            versionFile.write(minecraft_ver)
-            versionFile.truncate()
             log('Starting server', logFile)
             logFile.close()
-            versionFile.close()
             os.chdir("..")
             os.system('screen -S minecraft -d -m java -Xmx5120M -Xms5120M -jar minecraft_server.jar')
-            break
 
-else:
-    log('You are to date', logFile)
-    logFile.close()
-    versionFile.close()
+        else:
+            log('You are to date', logFile)
+            logFile.close()
 
+        break
 
