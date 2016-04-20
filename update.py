@@ -82,7 +82,7 @@ for version in data['versions']:
             os.system('screen -S minecraft -d -m java -Xmx5120M -Xms5120M -jar minecraft_server.jar')
 
         else:
-            log('You are to date', logFile)
+            log('You are up to date', logFile)
             logFile.close()
 
         break
