@@ -11,7 +11,7 @@ def log(string, logfile):
     logfile.write(string + "\n")
 
 
-updateToSnapShot = True
+updateToSnapShot = False
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 url = "https://launchermeta.mojang.com/mc/game/version_manifest.json"
