@@ -6,10 +6,16 @@ latest version. If not if will download the latest jar, then using screen it wil
 shutdown and give a 30 seconds countdown before stopping the server. it will then backup your world into a new folder
 when it updates incase something goes wrong. then update the server jar and start the server back up in screen so its in the background.
            
-The first line of the file is         
-updateToSnapShot = True          
-which means it will update to snapshots. Change it to false if you only want to update to the main releases
-         
-All the logs can be found in the update.log file.          
-        
-I set it up to run in a cron job twice a day so it will be fully automatic but feel free to only run it manually
+## Configuration
+
+### Latest vs. Snapshot
+UPDATE_TO_SNAPSHOT = <True,False>
+
+### Backup Directory
+BACKUP_DIR = <name of directory to save files>
+
+### Log File
+LOG_FILENAME = <name of file to save log messages>
+                
+## Scheduling Updates
+This script is intended to be run as a cron job.
