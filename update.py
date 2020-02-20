@@ -1,31 +1,33 @@
-from urllib import urlopen, urlretrieve
-import json
 import os
 import time
 import shutil
 import hashlib
 import time
+from datetime import datetime
+import logging
+import requests
 
-def log(string, logfile):
-    print(string)
-    logfile.write(string + "\n")
+
+# CONFIGURATION
+UPDATE_TO_SNAPSHOT = True
+MANIFEST_URL = "https://launchermeta.mojang.com/mc/game/version_manifest.json"
+BACKUP_DIR = 'world_backups'
+LOG_FILENAME = 'auto_updater.log'
 
 
-updateToSnapShot = False
-
+logging.basicConfig(filename=LOG_FILENAME,level=logging.INFO)
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
-url = "https://launchermeta.mojang.com/mc/game/version_manifest.json"
-response = urlopen(url)
-res = response.read()
-data = json.loads(res.decode('UTF-8'))
 
-if updateToSnapShot:
+# retrieve version manifest
+response = requests.get(MANIFEST_URL)
+data = response.json()
+
+if UPDATE_TO_SNAPSHOT:
     minecraft_ver = data['latest']['snapshot']
 else:
     minecraft_ver = data['latest']['release']
 
-logFile = open("update.log", "a+")
-
+# get checksum of running server
 if os.path.exists('../minecraft_server.jar'):
     sha = hashlib.sha1()
     f = open("../minecraft_server.jar", 'rb')
@@ -37,20 +39,21 @@ else:
 for version in data['versions']:
     if version['id'] == minecraft_ver:
         jsonlink = version['url']
-        jarres = urlopen(jsonlink).read()
-        jardata = json.loads(jarres.decode('UTF-8'))
-        jarsha = jardata['downloads']['server']['sha1']
+        jar_data = requests.get(jsonlink).json()
+        jar_sha = jar_data['downloads']['server']['sha1']
 
-        log('Your sha1 is ' + cur_ver + '. Latest version is ' + str(minecraft_ver) + " with sha1 of " + jarsha, logFile)
+        logging.info('Your sha1 is ' + cur_ver + '. Latest version is ' + str(minecraft_ver) + " with sha1 of " + jar_sha)
 
-        if cur_ver != jarsha:
-            log('Updating Server', logFile)
-            link = jardata['downloads']['server']['url']
-            log('Downloading jar from ' + link, logFile)
-            urlretrieve(link, 'minecraft_server.jar')
-            log('Downloaded', logFile)
+        if cur_ver != jar_sha:
+            logging.info('Updating server...')
+            link = jar_data['downloads']['server']['url']
+            logging.info('Downloading .jar from ' + link + '...')
+            response = requests.get(link)
+            with open('minecraft_server.jar', 'wb') as jar_file:
+                jar_file.write(response.content)
+            logging.info('Downloaded.')
             os.system('screen -S minecraft -X stuff \'say ATTENTION: Server will shutdown for 1 minutes to update in 30 seconds.^M\'')
-            log('Shutdown in 30 seconds', logFile)
+            logging.info('Shutting down server in 30 seconds.')
 
             for i in range(20, 9, -10):
                 time.sleep(10)
@@ -61,29 +64,32 @@ for version in data['versions']:
                 os.system('screen -S minecraft -X stuff \'say Shutdown in ' + str(i) + ' seconds^M\'')
             time.sleep(1)
 
-            log('Stopping server', logFile)
+            logging.info('Stopping server.')
             os.system('screen -S minecraft -X stuff \'stop^M\'')
             time.sleep(5)
-            log('Backing up world', logFile)
-            if not os.path.exists("world_backups"):
-                os.makedirs("world_backups")
+            logging.info('Backing up world...')
 
-            backupPath = "world_backups/world" +"_backup_" + str(int(time.time()/1000)) + "_sha=" + cur_ver
+            if not os.path.exists(BACKUP_DIR):
+                os.makedirs(BACKUP_DIR)
+
+            backupPath = os.path.join(
+                BACKUP_DIR,
+                "world" + "_backup_" + datetime.now().isoformat().replace(':', '-') + "_sha=" + cur_ver)
             shutil.copytree("../world", backupPath)
 
-            log('Backed up world\nUpdating server jar', logFile)
+            logging.info('Backed up world.')
+            logging.info('Updating server .jar')
+
             if os.path.exists('../minecraft_server.jar'):
                 os.remove('../minecraft_server.jar')
 
             os.rename('minecraft_server.jar', '../minecraft_server.jar')
-            log('Starting server', logFile)
-            logFile.close()
+            logging.info('Starting server...')
             os.chdir("..")
-            os.system('screen -S minecraft -d -m java -Xmx5120M -Xms5120M -jar minecraft_server.jar')
+            os.system('screen -S minecraft -d -m java -Xms16G -Xmx16G -jar minecraft_server.jar')
 
         else:
-            log('You are up to date', logFile)
-            logFile.close()
+            logging.info('Server is already up to date.')
 
         break
 
