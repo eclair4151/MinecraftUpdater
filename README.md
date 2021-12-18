@@ -16,6 +16,10 @@ BACKUP_DIR = <name of directory to save files>
 
 ### Log File
 LOG_FILENAME = <name of file to save log messages>
-                
+
+### Ram Settings                
+RAM_INITIAL = <amount of ram to start the server with>
+RAM_MAX = <maximum amount of ram to allocate torwards the server>           
+           
 ## Scheduling Updates
 This script is intended to be run as a cron job.
