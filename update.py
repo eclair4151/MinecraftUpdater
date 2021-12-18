@@ -13,6 +13,8 @@ UPDATE_TO_SNAPSHOT = True
 MANIFEST_URL = "https://launchermeta.mojang.com/mc/game/version_manifest.json"
 BACKUP_DIR = 'world_backups'
 LOG_FILENAME = 'auto_updater.log'
+RAM_INITIAL = '512m'
+RAM_MAX = '3g'
 
 
 logging.basicConfig(filename=LOG_FILENAME,level=logging.INFO)
@@ -86,7 +88,7 @@ for version in data['versions']:
             os.rename('minecraft_server.jar', '../minecraft_server.jar')
             logging.info('Starting server...')
             os.chdir("..")
-            os.system('screen -S minecraft -d -m java -Xms16G -Xmx16G -jar minecraft_server.jar')
+            os.system('screen -S minecraft -d -m java -Xms' + RAM_INITIAL + ' -Xmx' + RAM_MAX + ' -jar minecraft_server.jar')
 
         else:
             logging.info('Server is already up to date.')
