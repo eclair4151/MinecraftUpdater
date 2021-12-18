@@ -10,12 +10,12 @@ import requests
 
 # CONFIGURATION
 UPDATE_TO_SNAPSHOT = True
-MANIFEST_URL = "https://launchermeta.mojang.com/mc/game/version_manifest.json"
 BACKUP_DIR = 'world_backups'
 LOG_FILENAME = 'auto_updater.log'
 RAM_INITIAL = '512m'
 RAM_MAX = '3g'
 
+MANIFEST_URL = "https://launchermeta.mojang.com/mc/game/version_manifest.json"
 
 logging.basicConfig(filename=LOG_FILENAME,level=logging.INFO)
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -54,7 +54,7 @@ for version in data['versions']:
             with open('minecraft_server.jar', 'wb') as jar_file:
                 jar_file.write(response.content)
             logging.info('Downloaded.')
-            os.system('screen -S minecraft -X stuff \'say ATTENTION: Server will shutdown for 1 minutes to update in 30 seconds.^M\'')
+            os.system('screen -S minecraft -X stuff \'say ATTENTION: Server will shutdown temporarily to update in 30 seconds.^M\'')
             logging.info('Shutting down server in 30 seconds.')
 
             for i in range(20, 9, -10):
