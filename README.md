@@ -9,17 +9,17 @@ when it updates incase something goes wrong. then update the server jar and star
 ## Configuration
 
 ### Latest vs. Snapshot
-UPDATE_TO_SNAPSHOT = <True,False>
+UPDATE_TO_SNAPSHOT = \<True,False\> whether to update to the latest snapshot, or main release
 
 ### Backup Directory
-BACKUP_DIR = <name of directory to save files>
+BACKUP_DIR = \<name of directory to save files\>
 
 ### Log File
-LOG_FILENAME = <name of file to save log messages>
+LOG_FILENAME = \<name of file to save log messages\>
 
 ### Ram Settings                
-RAM_INITIAL = <amount of ram to start the server with><br>
-RAM_MAX = <maximum amount of ram to allocate torwards the server>           
+RAM_INITIAL = \<amount of ram to start the server with\><br>
+RAM_MAX = \<maximum amount of ram to allocate torwards the server\>           
            
 ## Scheduling Updates
 This script is intended to be run as a cron job.
