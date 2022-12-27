@@ -9,7 +9,7 @@ import requests
 
 
 # CONFIGURATION
-UPDATE_TO_SNAPSHOT = True
+UPDATE_TO_SNAPSHOT = False
 BACKUP_DIR = 'world_backups'
 LOG_FILENAME = 'auto_updater.log'
 RAM_INITIAL = '512m'
