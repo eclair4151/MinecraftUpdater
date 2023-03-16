@@ -6,18 +6,27 @@ import time
 from datetime import datetime
 import logging
 import requests
+import yaml
 
+with open('config.yml', 'r') as file:
+    config = yaml.safe_load(file)
 
 # CONFIGURATION
-UPDATE_TO_SNAPSHOT = False
-BACKUP_DIR = 'world_backups'
-LOG_FILENAME = 'auto_updater.log'
-RAM_INITIAL = '512m'
-RAM_MAX = '3g'
+UPDATE_TO_SNAPSHOT = config['config']['UPDATE_TO_SNAPSHOT']
+BACKUP_DIR = config['config']['BACKUP_DIR']
+LOG_FILENAME = f"{config['config']['LOG_FILENAME']}_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.log"
+RAM_INITIAL = config['config']['RAM_INITIAL']
+RAM_MAX = config['config']['RAM_MAX']
+
+log_dir = 'Logs'
+if not os.path.exists(log_dir):
+    os.makedirs(log_dir)
+
+LOG_PATH = os.path.join(log_dir, LOG_FILENAME)
 
 MANIFEST_URL = "https://launchermeta.mojang.com/mc/game/version_manifest.json"
 
-logging.basicConfig(filename=LOG_FILENAME,level=logging.INFO)
+logging.basicConfig(filename=LOG_PATH, level=logging.INFO)
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 # retrieve version manifest

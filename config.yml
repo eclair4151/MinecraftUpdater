@@ -1,0 +1,6 @@
+config:
+  UPDATE_TO_SNAPSHOT: False
+  BACKUP_DIR: \backups
+  LOG_FILENAME: logging
+  RAM_INITIAL: 500mb
+  RAM_MAX: 1gb
