@@ -77,7 +77,7 @@ for version in data['versions']:
             backupPath = os.path.join(
                 BACKUP_DIR,
                 "world" + "_backup_" + datetime.now().isoformat().replace(':', '-') + "_sha=" + cur_ver)
-            shutil.copytree("../world", backupPath)
+            shutil.make_archive(backupPath, 'zip', "../world")
 
             logging.info('Backed up world.')
             logging.info('Updating server .jar')
